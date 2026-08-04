@@ -180,6 +180,9 @@
       z-index: 500;
     }
 
+    .mode-tab-bar::-webkit-scrollbar { height: 4px; }
+    .mode-tab-bar::-webkit-scrollbar-thumb { background: var(--card-border); }
+
     .tab-btn {
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--card-border);
@@ -259,10 +262,10 @@
     .user-location-dot {
       width: 18px;
       height: 18px;
-      background-color: var(--accent-coral);
+      background-color: var(--accent-teal);
       border: 3px solid #fff;
       border-radius: 50%;
-      box-shadow: 0 0 12px rgba(255, 94, 87, 0.8);
+      box-shadow: 0 0 12px var(--accent-teal);
       animation: pulse 2s infinite;
     }
 
@@ -311,9 +314,9 @@
     }
 
     @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(255, 94, 87, 0.7); }
-      70% { box-shadow: 0 0 0 14px rgba(255, 94, 87, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(255, 94, 87, 0); }
+      0% { box-shadow: 0 0 0 0 rgba(0, 210, 211, 0.7); }
+      70% { box-shadow: 0 0 0 14px rgba(0, 210, 211, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 210, 211, 0); }
     }
   </style>
 </head>
@@ -343,7 +346,7 @@
     <div class="pinned-card">
       <span class="pinned-badge">PINNED</span>
       <div class="pinned-title">Mexico City (CDMX)</div>
-      <div class="pinned-sub">Official MI Transit Network — Metro, Metrobús, Cablebús, Trolebús, Suburbanos & Ecobici</div>
+      <div class="pinned-sub">Official MI Transit Network — Metro, Metrobús, Cablebús, Trolebús, Suburbano, Insurgente, Mexibús, Mexicable & Ecobici</div>
       <button class="open-map-btn" onclick="openCityMap('cdmx')">
         <i data-lucide="map" size="18"></i> Open Transit Map
       </button>
@@ -382,9 +385,11 @@
 
       if (!map) {
         initMap();
-      } else {
-        setTimeout(() => { map.invalidateSize(); }, 200);
       }
+      
+      setTimeout(() => { 
+        if (map) map.invalidateSize(); 
+      }, 150);
 
       renderTabs();
       switchMode('all');
@@ -448,6 +453,7 @@
     }
 
     function renderMapLayers(modeId) {
+      if (!activeLayerGroup) return;
       activeLayerGroup.clearLayers();
 
       const netData = (modeId === 'all') 
@@ -460,10 +466,10 @@
         // Draw Lines
         if (network.lines) {
           network.lines.forEach(line => {
-            if (!line.coords) return;
+            if (!line.coords || line.coords.length === 0) return;
             const polyline = L.polyline(line.coords, {
               color: line.color,
-              weight: 6,
+              weight: (modeId === 'all') ? 4 : 6,
               opacity: 0.95
             });
 
@@ -518,8 +524,7 @@
             marker.bindPopup(`
               <div class="popup-title">${st.name}</div>
               <div class="popup-tag" style="background:${markerColor}">${st.lineName || network.name}</div>
-              ${transferPills}
-              ${ecobiciNotice}
+              ${transferPills}${ecobiciNotice}
             `);
 
             activeLayerGroup.addLayer(marker);
@@ -527,7 +532,7 @@
         }
       });
 
-      // Render Google Maps POIs
+      // Render POIs
       if (typeof cdmxPOIs !== 'undefined') {
         cdmxPOIs.forEach(poi => {
           const poiIcon = L.divIcon({
@@ -551,7 +556,7 @@
 
     function triggerGPS() {
       if (!navigator.geolocation) {
-        alert("Geolocation is not supported.");
+        alert("Geolocation is not supported by your browser.");
         return;
       }
 
@@ -573,7 +578,7 @@
 
         map.setView(latlng, 15);
       }, err => {
-        alert("GPS Location unavailable.");
+        alert("GPS Signal unavailable.");
       }, { enableHighAccuracy: true });
     }
 
