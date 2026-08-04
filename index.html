@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Rumbo Maps — Official Transit Network & Navigation</title>
+  <title>Rumbo Maps — CDMX Official Transit Network</title>
 
   <!-- Typography & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -163,7 +163,6 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-
       transition: opacity 0.2s;
     }
 
@@ -209,7 +208,7 @@
       flex-direction: column;
     }
 
-    /* Horizontal Mode Selector Bar */
+    /* Mode Tabs Bar */
     .mode-tab-bar {
       background: var(--card-bg);
       border-bottom: 1px solid var(--card-border);
@@ -251,7 +250,7 @@
       color: var(--text-main);
     }
 
-    /* System Information Banner */
+    /* Info Drawer */
     .info-drawer {
       background: rgba(22, 26, 34, 0.95);
       border-bottom: 1px solid var(--card-border);
@@ -295,7 +294,6 @@
 
     .official-link:hover { text-decoration: underline; }
 
-    /* Map Canvas */
     #map {
       flex: 1;
       width: 100%;
@@ -303,7 +301,6 @@
       z-index: 100;
     }
 
-    /* GPS Floating Control */
     .gps-btn {
       position: absolute;
       bottom: 24px;
@@ -322,7 +319,6 @@
       cursor: pointer;
     }
 
-    /* Station Icon Scaling & Custom Markers */
     .leaflet-popup-content-wrapper {
       background: var(--card-bg);
       color: var(--text-main);
@@ -367,7 +363,6 @@
       gap: 4px;
     }
 
-    /* GPS Pulsing Dot */
     .user-location-dot {
       width: 16px;
       height: 16px;
@@ -403,7 +398,7 @@
     </div>
   </header>
 
-  <!-- Dashboard View -->
+  <!-- Dashboard -->
   <div id="dashboardView" class="dashboard-container">
     <div class="section-label">
       <i data-lucide="pin" size="14" style="color:var(--accent-coral)"></i>
@@ -413,7 +408,7 @@
     <div class="pinned-card">
       <span class="pinned-badge">PINNED</span>
       <div class="pinned-title">Mexico City (CDMX)</div>
-      <div class="pinned-sub">Official MI Transit Network — Metro, Metrobús, Cablebús, Trolebús, Suburbanos & Ecobici</div>
+      <div class="pinned-sub">Official MI Transit Network — Metro (12 Lines), Metrobús (7 Lines), Cablebús, Trolebús, Suburbanos & Ecobici</div>
       <button class="open-map-btn" onclick="openCityMap('cdmx')">
         <i data-lucide="map" size="18"></i> Open Transit Map
       </button>
@@ -442,22 +437,15 @@
 
   <!-- Map View -->
   <div id="mapView" class="map-interface">
-    <!-- Transit Mode Tabs -->
     <div class="mode-tab-bar" id="modeTabBar"></div>
-
-    <!-- System Hours & Official URL Banner -->
     <div class="info-drawer" id="infoDrawer"></div>
-
-    <!-- Map Canvas -->
     <div id="map"></div>
-
-    <!-- Floating Live GPS Button -->
     <button class="gps-btn" onclick="triggerGPS()" title="Locate Me">
       <i data-lucide="crosshair" size="22"></i>
     </button>
   </div>
 
-  <!-- Load External Network Dataset -->
+  <!-- Load Embedded Data File -->
   <script src="cdmx-data.js"></script>
 
   <script>
@@ -490,14 +478,9 @@
     }
 
     function initMap() {
-      // Center CDMX
-      map = L.map('map', {
-        zoomControl: false
-      }).setView([19.4326, -99.1332], 12);
-
+      map = L.map('map', { zoomControl: false }).setView([19.4326, -99.1332], 11);
       L.control.zoom({ position: 'topright' }).addTo(map);
 
-      // Dark Muted Base Tiles matching Rumbo theme (#0d0f12)
       L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; OpenStreetMap &copy; CARTO &copy; SEMOVI CDMX',
         maxZoom: 19,
@@ -528,7 +511,6 @@
     function updateInfoDrawer(modeId) {
       const net = cdmxNetworks.find(n => n.id === modeId);
       const drawer = document.getElementById('infoDrawer');
-
       if (!net) return;
 
       drawer.innerHTML = `
@@ -561,75 +543,79 @@
         : [cdmxNetworks.find(n => n.id === modeId)];
 
       netData.forEach(network => {
-        if (!network || !network.lines) return;
+        if (!network) return;
 
         // Render Lines
-        network.lines.forEach(line => {
-          const polyline = L.polyline(line.coords, {
-            color: line.color,
-            weight: 5,
-            opacity: 0.85
+        if (network.lines) {
+          network.lines.forEach(line => {
+            if (!line.coords) return;
+            const polyline = L.polyline(line.coords, {
+              color: line.color,
+              weight: 5,
+              opacity: 0.9
+            });
+
+            polyline.bindPopup(`
+              <div class="popup-title">${line.name}</div>
+              <div class="popup-tag" style="background:${line.color}">${network.name}</div>
+            `);
+
+            activeLayerGroup.addLayer(polyline);
           });
+        }
 
-          polyline.bindPopup(`
-            <div class="popup-title">${line.name}</div>
-            <div class="popup-tag" style="background:${line.color}">${network.name}</div>
-          `);
+        // Render Stations
+        if (network.stations) {
+          network.stations.forEach(st => {
+            const isTransfer = st.transfers && st.transfers.length > 0;
+            const markerColor = st.lineColor || network.defaultColor;
 
-          activeLayerGroup.addLayer(polyline);
-        });
+            const iconHtml = `
+              <div style="
+                background:${markerColor}; 
+                width:${isTransfer ? '16px' : '10px'}; 
+                height:${isTransfer ? '16px' : '10px'}; 
+                border-radius:50%; 
+                border:2px solid #fff;
+                box-shadow: 0 0 8px ${markerColor};">
+              </div>`;
 
-        // Render Stations & Transfers
-        network.stations.forEach(st => {
-          const isTransfer = st.transfers && st.transfers.length > 0;
-          const markerColor = network.defaultColor;
+            const customIcon = L.divIcon({
+              html: iconHtml,
+              className: '',
+              iconSize: [16, 16],
+              iconAnchor: [8, 8]
+            });
 
-          // Custom SVG Icon
-          const iconHtml = `
-            <div style="
-              background:${markerColor}; 
-              width:${isTransfer ? '18px' : '12px'}; 
-              height:${isTransfer ? '18px' : '12px'}; 
-              border-radius:50%; 
-              border:2px solid #fff;
-              box-shadow: 0 0 8px ${markerColor};">
-            </div>`;
+            const marker = L.marker(st.coords, { icon: customIcon });
 
-          const customIcon = L.divIcon({
-            html: iconHtml,
-            className: '',
-            iconSize: [18, 18],
-            iconAnchor: [9, 9]
+            let transferPills = '';
+            if (isTransfer) {
+              transferPills = `
+                <div style="font-size:0.75rem; font-weight:700; margin-top:6px; color:var(--text-muted)">Transbordos:</div>
+                <div class="transfer-icons">
+                  ${st.transfers.map(tr => `<span class="transfer-pill"><i data-lucide="refresh-cw" size="10"></i> ${tr}</span>`).join('')}
+                </div>
+              `;
+            }
+
+            let ecobiciNotice = st.hasEcobici 
+              ? `<div style="margin-top:6px; color:var(--accent-teal); font-size:0.75rem; font-weight:700;"><i data-lucide="bike" size="12"></i> Biciestación Ecobici disponible</div>`
+              : '';
+
+            marker.bindPopup(`
+              <div class="popup-title">${st.name}</div>
+              <div class="popup-tag" style="background:${markerColor}">${st.lineName || network.name}</div>
+              ${transferPills}
+              ${ecobiciNotice}
+            `);
+
+            activeLayerGroup.addLayer(marker);
           });
-
-          const marker = L.marker(st.coords, { icon: customIcon });
-
-          let transferPills = '';
-          if (isTransfer) {
-            transferPills = `
-              <div style="font-size:0.75rem; font-weight:700; margin-top:6px; color:var(--text-muted)">Transbordos Disponibles:</div>
-              <div class="transfer-icons">
-                ${st.transfers.map(tr => `<span class="transfer-pill"><i data-lucide="refresh-cw" size="10"></i> ${tr}</span>`).join('')}
-              </div>
-            `;
-          }
-
-          let ecobiciNotice = st.hasEcobici 
-            ? `<div style="margin-top:6px; color:var(--accent-teal); font-size:0.75rem; font-weight:700;"><i data-lucide="bike" size="12"></i> Biciestación Ecobici en exterior</div>`
-            : '';
-
-          marker.bindPopup(`
-            <div class="popup-title">${st.name}</div>
-            <div class="popup-tag" style="background:${network.defaultColor}">${network.name}</div>
-            ${transferPills}
-            ${ecobiciNotice}
-          `);
-
-          activeLayerGroup.addLayer(marker);
-        });
+        }
       });
 
-      // Render POIs matched to Google Maps
+      // Render Google Maps Matched POIs
       cdmxPOIs.forEach(poi => {
         const poiIcon = L.divIcon({
           html: `<div style="background:var(--accent-amber); padding:4px; border-radius:6px; border:1px solid #fff; display:flex;"><i data-lucide="${poi.icon}" size="12" style="color:#000;"></i></div>`,
@@ -651,7 +637,7 @@
 
     function triggerGPS() {
       if (!navigator.geolocation) {
-        alert("Geolocation is not supported by your browser.");
+        alert("Geolocation is not supported.");
         return;
       }
 
@@ -673,7 +659,7 @@
 
         map.setView(latlng, 15);
       }, err => {
-        alert("Unable to retrieve GPS location.");
+        alert("GPS Signal unavailable.");
       }, { enableHighAccuracy: true });
     }
 
