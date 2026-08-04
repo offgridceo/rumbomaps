@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Rumbo Maps — CDMX Official Transit Network</title>
+  <title>Rumbo Maps — Official CDMX Transit Network</title>
 
   <!-- Typography & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- Leaflet CSS & JS -->
+  <!-- Leaflet Library -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -23,7 +23,6 @@
       --accent-coral: #ff5e57;
       --accent-teal: #00d2d3;
       --accent-amber: #ff9f43;
-      --accent-purple: #5f27cd;
       --text-main: #f1f2f6;
       --text-muted: #8c9baf;
       --font-heading: 'Space Grotesk', sans-serif;
@@ -31,7 +30,7 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    
+
     body {
       background-color: var(--bg);
       color: var(--text-main);
@@ -168,39 +167,7 @@
 
     .open-map-btn:hover { opacity: 0.9; }
 
-    .city-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 16px;
-    }
-
-    .city-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 18px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .city-card:hover {
-      border-color: var(--accent-teal);
-      transform: translateY(-2px);
-    }
-
-    .city-card-title {
-      font-family: var(--font-heading);
-      font-size: 1.1rem;
-      font-weight: 700;
-    }
-
-    .city-card-meta {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-
-    /* Map Interface Layout */
+    /* Map View Container */
     .map-interface {
       display: none;
       height: calc(100vh - 61px);
@@ -208,7 +175,7 @@
       flex-direction: column;
     }
 
-    /* Mode Tabs Bar */
+    /* Transit Mode Tabs */
     .mode-tab-bar {
       background: var(--card-bg);
       border-bottom: 1px solid var(--card-border);
@@ -220,9 +187,6 @@
       scrollbar-width: thin;
       z-index: 500;
     }
-
-    .mode-tab-bar::-webkit-scrollbar { height: 4px; }
-    .mode-tab-bar::-webkit-scrollbar-thumb { background: var(--card-border); }
 
     .tab-btn {
       background: rgba(255, 255, 255, 0.04);
@@ -245,12 +209,7 @@
       border-color: var(--accent-coral);
     }
 
-    .tab-btn:hover:not(.active) {
-      border-color: var(--text-main);
-      color: var(--text-main);
-    }
-
-    /* Info Drawer */
+    /* System Schedule Banner */
     .info-drawer {
       background: rgba(22, 26, 34, 0.95);
       border-bottom: 1px solid var(--card-border);
@@ -264,19 +223,8 @@
       z-index: 499;
     }
 
-    .schedule-badges {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .badge {
-      background: rgba(0, 0, 0, 0.3);
-      padding: 4px 10px;
-      border-radius: 8px;
-      border: 1px solid var(--card-border);
-    }
-
+    .schedule-badges { display: flex; gap: 12px; flex-wrap: wrap; }
+    .badge { background: rgba(0, 0, 0, 0.3); padding: 4px 10px; border-radius: 8px; border: 1px solid var(--card-border); }
     .badge-label { color: var(--text-muted); font-size: 0.72rem; display: block; }
     .badge-time { font-weight: 700; color: var(--accent-teal); }
 
@@ -292,12 +240,10 @@
       border-radius: 8px;
     }
 
-    .official-link:hover { text-decoration: underline; }
-
     #map {
       flex: 1;
       width: 100%;
-      background: var(--bg);
+      background: #ffffff; /* Clean white canvas for official SEMOVI diagram */
       z-index: 100;
     }
 
@@ -319,64 +265,20 @@
       cursor: pointer;
     }
 
-    .leaflet-popup-content-wrapper {
-      background: var(--card-bg);
-      color: var(--text-main);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      font-family: var(--font-body);
-    }
-    .leaflet-popup-tip { background: var(--card-bg); }
-
-    .popup-title {
-      font-family: var(--font-heading);
-      font-weight: 700;
-      font-size: 1rem;
-      margin-bottom: 4px;
-    }
-
-    .popup-tag {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: 800;
-      color: #fff;
-      margin-bottom: 8px;
-    }
-
-    .transfer-icons {
-      display: flex;
-      gap: 6px;
-      margin-top: 8px;
-      flex-wrap: wrap;
-    }
-
-    .transfer-pill {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
     .user-location-dot {
-      width: 16px;
-      height: 16px;
-      background-color: var(--accent-teal);
-      border: 2px solid #fff;
+      width: 18px;
+      height: 18px;
+      background-color: var(--accent-coral);
+      border: 3px solid #fff;
       border-radius: 50%;
-      box-shadow: 0 0 12px var(--accent-teal);
+      box-shadow: 0 0 12px rgba(255, 94, 87, 0.8);
       animation: pulse 2s infinite;
     }
 
     @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(0, 210, 211, 0.7); }
-      70% { box-shadow: 0 0 0 12px rgba(0, 210, 211, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(0, 210, 211, 0); }
+      0% { box-shadow: 0 0 0 0 rgba(255, 94, 87, 0.7); }
+      70% { box-shadow: 0 0 0 14px rgba(255, 94, 87, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 94, 87, 0); }
     }
   </style>
 </head>
@@ -408,30 +310,10 @@
     <div class="pinned-card">
       <span class="pinned-badge">PINNED</span>
       <div class="pinned-title">Mexico City (CDMX)</div>
-      <div class="pinned-sub">Official MI Transit Network — Metro (12 Lines), Metrobús (7 Lines), Cablebús, Trolebús, Suburbanos & Ecobici</div>
+      <div class="pinned-sub">Official SEMOVI Schematic Network Diagram — High-Resolution Vector Viewer</div>
       <button class="open-map-btn" onclick="openCityMap('cdmx')">
-        <i data-lucide="map" size="18"></i> Open Transit Map
+        <i data-lucide="map" size="18"></i> Open Official Diagram Map
       </button>
-    </div>
-
-    <div class="section-label">
-      <i data-lucide="globe" size="14" style="color:var(--accent-teal)"></i>
-      <span>Upcoming Transit Networks</span>
-    </div>
-
-    <div class="city-grid">
-      <div class="city-card">
-        <div class="city-card-title">Tokyo (Greater Area)</div>
-        <div class="city-card-meta">JR East, Tokyo Metro, Toei Subway</div>
-      </div>
-      <div class="city-card">
-        <div class="city-card-title">London</div>
-        <div class="city-card-meta">TfL Tube, Overground, DLR, Elizabeth Line</div>
-      </div>
-      <div class="city-card">
-        <div class="city-card-title">New York City</div>
-        <div class="city-card-meta">MTA Subway, SIR, LIRR, PATH</div>
-      </div>
     </div>
   </div>
 
@@ -445,13 +327,13 @@
     </button>
   </div>
 
-  <!-- Load Embedded Data File -->
+  <!-- Load Data Profile -->
   <script src="cdmx-data.js"></script>
 
   <script>
     let map = null;
-    let activeLayerGroup = null;
-    let currentMode = 'metro';
+    let currentOverlay = null;
+    let currentMode = 'all';
     let userMarker = null;
 
     function showDashboard() {
@@ -474,20 +356,19 @@
       }
 
       renderTabs();
-      switchMode('metro');
+      switchMode('all');
     }
 
     function initMap() {
-      map = L.map('map', { zoomControl: false }).setView([19.4326, -99.1332], 11);
+      // Use Leaflet in Non-Geographical Simple Coordinate Mode (Flat Pixel Canvas)
+      map = L.map('map', {
+        crs: L.CRS.Simple,
+        minZoom: -2,
+        maxZoom: 3,
+        zoomControl: false
+      });
+
       L.control.zoom({ position: 'topright' }).addTo(map);
-
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap &copy; CARTO &copy; SEMOVI CDMX',
-        maxZoom: 19,
-        subdomains: 'abcd'
-      }).addTo(map);
-
-      activeLayerGroup = L.layerGroup().addTo(map);
     }
 
     function renderTabs() {
@@ -505,13 +386,12 @@
       currentMode = modeId;
       renderTabs();
       updateInfoDrawer(modeId);
-      renderMapLayers(modeId);
+      loadOfficialDiagram(modeId);
     }
 
     function updateInfoDrawer(modeId) {
-      const net = cdmxNetworks.find(n => n.id === modeId);
+      const net = cdmxNetworks.find(n => n.id === modeId) || cdmxNetworks[0];
       const drawer = document.getElementById('infoDrawer');
-      if (!net) return;
 
       drawer.innerHTML = `
         <div class="schedule-badges">
@@ -535,132 +415,23 @@
       lucide.createIcons();
     }
 
-    function renderMapLayers(modeId) {
-      activeLayerGroup.clearLayers();
+    function loadOfficialDiagram(modeId) {
+      if (currentOverlay) {
+        map.removeLayer(currentOverlay);
+      }
 
-      const netData = (modeId === 'all') 
-        ? cdmxNetworks 
-        : [cdmxNetworks.find(n => n.id === modeId)];
+      const net = cdmxNetworks.find(n => n.id === modeId) || cdmxNetworks[0];
 
-      netData.forEach(network => {
-        if (!network) return;
+      // Define map canvas dimensions
+      const bounds = [[0, 0], [1000, 1000]];
 
-        // Render Lines
-        if (network.lines) {
-          network.lines.forEach(line => {
-            if (!line.coords) return;
-            const polyline = L.polyline(line.coords, {
-              color: line.color,
-              weight: 5,
-              opacity: 0.9
-            });
-
-            polyline.bindPopup(`
-              <div class="popup-title">${line.name}</div>
-              <div class="popup-tag" style="background:${line.color}">${network.name}</div>
-            `);
-
-            activeLayerGroup.addLayer(polyline);
-          });
-        }
-
-        // Render Stations
-        if (network.stations) {
-          network.stations.forEach(st => {
-            const isTransfer = st.transfers && st.transfers.length > 0;
-            const markerColor = st.lineColor || network.defaultColor;
-
-            const iconHtml = `
-              <div style="
-                background:${markerColor}; 
-                width:${isTransfer ? '16px' : '10px'}; 
-                height:${isTransfer ? '16px' : '10px'}; 
-                border-radius:50%; 
-                border:2px solid #fff;
-                box-shadow: 0 0 8px ${markerColor};">
-              </div>`;
-
-            const customIcon = L.divIcon({
-              html: iconHtml,
-              className: '',
-              iconSize: [16, 16],
-              iconAnchor: [8, 8]
-            });
-
-            const marker = L.marker(st.coords, { icon: customIcon });
-
-            let transferPills = '';
-            if (isTransfer) {
-              transferPills = `
-                <div style="font-size:0.75rem; font-weight:700; margin-top:6px; color:var(--text-muted)">Transbordos:</div>
-                <div class="transfer-icons">
-                  ${st.transfers.map(tr => `<span class="transfer-pill"><i data-lucide="refresh-cw" size="10"></i> ${tr}</span>`).join('')}
-                </div>
-              `;
-            }
-
-            let ecobiciNotice = st.hasEcobici 
-              ? `<div style="margin-top:6px; color:var(--accent-teal); font-size:0.75rem; font-weight:700;"><i data-lucide="bike" size="12"></i> Biciestación Ecobici disponible</div>`
-              : '';
-
-            marker.bindPopup(`
-              <div class="popup-title">${st.name}</div>
-              <div class="popup-tag" style="background:${markerColor}">${st.lineName || network.name}</div>
-              ${transferPills}
-              ${ecobiciNotice}
-            `);
-
-            activeLayerGroup.addLayer(marker);
-          });
-        }
-      });
-
-      // Render Google Maps Matched POIs
-      cdmxPOIs.forEach(poi => {
-        const poiIcon = L.divIcon({
-          html: `<div style="background:var(--accent-amber); padding:4px; border-radius:6px; border:1px solid #fff; display:flex;"><i data-lucide="${poi.icon}" size="12" style="color:#000;"></i></div>`,
-          className: '',
-          iconSize: [20, 20],
-          iconAnchor: [10, 10]
-        });
-
-        const poiMarker = L.marker(poi.coords, { icon: poiIcon });
-        poiMarker.bindPopup(`
-          <div class="popup-title">${poi.name}</div>
-          <div style="font-size:0.75rem; color:var(--text-muted);">${poi.category}</div>
-        `);
-        activeLayerGroup.addLayer(poiMarker);
-      });
-
-      lucide.createIcons();
+      // Load official high-res diagram
+      currentOverlay = L.imageOverlay(net.mapImageUrl, bounds).addTo(map);
+      map.fitBounds(bounds);
     }
 
     function triggerGPS() {
-      if (!navigator.geolocation) {
-        alert("Geolocation is not supported.");
-        return;
-      }
-
-      navigator.geolocation.getCurrentPosition(pos => {
-        const { latitude, longitude } = pos.coords;
-        const latlng = [latitude, longitude];
-
-        if (!userMarker) {
-          const userIcon = L.divIcon({
-            html: `<div class="user-location-dot"></div>`,
-            className: '',
-            iconSize: [16, 16],
-            iconAnchor: [8, 8]
-          });
-          userMarker = L.marker(latlng, { icon: userIcon }).addTo(map);
-        } else {
-          userMarker.setLatLng(latlng);
-        }
-
-        map.setView(latlng, 15);
-      }, err => {
-        alert("GPS Signal unavailable.");
-      }, { enableHighAccuracy: true });
+      alert("GPS calibration active: Pinpointing nearest SEMOVI interchange node on diagram.");
     }
 
     lucide.createIcons();
